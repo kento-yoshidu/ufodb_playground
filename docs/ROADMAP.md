@@ -60,23 +60,28 @@ WASMの仕組み（ビルド → Reactから呼ぶ → CIでビルドしてPages
   - [x] WASMの中の値が変わってもReactは再描画しないため、`increment()`のあとに`value()`を読んで`useState`に入れる（`Ufdb`でも「操作 → `groups()`を読み直す → stateに入れる」の形になる）
   - [x] `pnpm build`が通る（`build`に`eslint .`が入ったため、`eslint.config.js`の`globalIgnores`に`wasm/pkg`などを追加）
   - [x] `pnpm dev`でボタンを押すと数が増えることを確認する
-  - [ ] 公開URLでも同じように動くことを確認する（`main`にマージしたあと）
+  - [ ] ~~公開URLでも同じように動くことを確認する~~（見送り。画面から`Counter`を外して`Ufdb`の確認に置き換えたため。同じ「`new`して`useRef`で持ち、メソッドを呼ぶ」形は、3-2の`make_set`を公開URLで確認できたことで代わりに確認済み）
 
 ### 3-2: `ufodb_v0`につなぐ
 
 前提（`ufodb_v0`側の対応）:
 
-- [x] ~~**ブロッカー**~~（解消）: `ufodb_v0`の`lib`が`wasm32-unknown-unknown`でビルドできなかった。`open`/`tiny_http`（`main.rs`の`SNAPSHOT`でしか使わない）が`[dependencies]`にあり、libのビルドにも巻き込まれていたため（`open`クレートの`compile_error!`で失敗）。2026-09-27、`ufodb_v0`側で依存をfeature（`storage` = `directories`/`serde_json`、`cli` = `clap`/`open`/`tiny_http` + `storage`、`default = ["cli"]`）に分け、binに`required-features = ["cli"]`を付けて解消（`ufodb_v0`側はまだ未コミット）
+- [x] ~~**ブロッカー**~~（解消）: `ufodb_v0`の`lib`が`wasm32-unknown-unknown`でビルドできなかった。`open`/`tiny_http`（`main.rs`の`SNAPSHOT`でしか使わない）が`[dependencies]`にあり、libのビルドにも巻き込まれていたため（`open`クレートの`compile_error!`で失敗）。2026-09-27、`ufodb_v0`側で依存をfeature（`storage` = `directories`/`serde_json`、`cli` = `clap`/`open`/`tiny_http` + `storage`、`default = ["cli"]`）に分け、binに`required-features = ["cli"]`を付けて解消（`ufodb_v0`の`main`にマージ済み）
 - [x] `ufodb/`で`cargo check --lib --target wasm32-unknown-unknown --no-default-features`が通ることを確認する（2026-09-27確認）
 
 Playground側（3-1のサンプルの中身を`Ufdb`に置き換える）:
 
-- [ ] `wasm/Cargo.toml`に`ufodb_v0`を追加する。最初はローカルの`ufodb`をpath依存か`[patch]`で参照し、`ufodb_v0`側の変更が`main`に入ったらgit依存（`default-features = false`）に切り替える
+- [x] `wasm/Cargo.toml`に`ufodb_v0`を追加する。最初はローカルの`ufodb`をpath依存か`[patch]`で参照し、`ufodb_v0`側の変更が`main`に入ったらgit依存（`default-features = false`）に切り替える
   - [x] path依存（`ufodb_v0 = { path = "../../ufodb", default-features = false }`）で追加し、`wasm/`で`cargo check --target wasm32-unknown-unknown`が通ることを確認（2026-09-27）
   - [x] `ufodb_v0`側の変更が`main`に入った（2026-09-27、`29ccd97`）ので、git依存（`git = "https://github.com/kento-yoshidu/ufodb_v0"`、`default-features = false`）に切り替える。path依存のままだとCI（GitHub Actions）には`../../ufodb`が無いためビルドが失敗するので、`main`へマージする前に切り替える
 - [ ] `#[wasm_bindgen]`で`Ufdb`をラップした型を公開する。最初は`new`/`make_set`/`groups`だけ。`groups()`は借用（`HashMap<usize, Vec<&String>>`）を返すため、所有権のある型（`Vec<Vec<String>>`など）に変換して返す
-  - [ ] `make_set`をReactから呼ぶと`RuntimeError: memory access out of bounds`になる（2026-09-27）。原因は`StrictMode`で`useEffect`が2回走り、`init()`が同時に2回呼ばれること。`init()`の「初期化済みなら何もしない」チェックは読み込み完了後にしか効かないため、WASMのインスタンスが2つでき、後から完了した方で`wasm`が上書きされる。先に作った`Ufdb`がGCされると、`FinalizationRegistry`がその`free`を「今の」インスタンスに対して呼び、同じアドレスにある生きている`Ufdb`のメモリを解放してしまう（Nodeで`init()`を2回同時に呼び、`gc()`後に`make_set`して再現確認）。`init()`をモジュールのトップレベルや`main.tsx`で1回だけ呼ぶようにして解消する
+  - [x] ラッパーの`struct Ufdb { inner: ufodb_v0::Ufdb }`を作り、`new`（`#[wasm_bindgen(constructor)]`）と`make_set(&mut self, key: &str) -> bool`を公開（他crateの型には`#[wasm_bindgen]`を付けられないため、自分のstructのフィールドに本体を持つ）。`pkg/`は`wasm-pack build`でしか更新されない（`cargo build`/`cargo check`では更新されず、古い`wasm.d.ts`のままで`Ufdb`をimportできなかった）
+  - [x] `make_set`をReactから呼ぶと`RuntimeError: memory access out of bounds`になる（2026-09-27）。原因は`StrictMode`で`useEffect`が2回走り、`init()`が同時に2回呼ばれること。`init()`の「初期化済みなら何もしない」チェックは読み込み完了後にしか効かないため、WASMのインスタンスが2つでき、後から完了した方で`wasm`が上書きされる。先に作った`Ufdb`がGCされると、`FinalizationRegistry`がその`free`を「今の」インスタンスに対して呼び、同じアドレスにある生きている`Ufdb`のメモリを解放してしまう（Nodeで`init()`を2回同時に呼び、`gc()`後に`make_set`して再現確認）。`main.tsx`で`init()`を1回だけ呼び、終わってから`render`するようにして解消
+  - [x] ボタンのクリックのたびにページがリロードされ、`make_set`が毎回`true`になった。原因は`<form>`の中の`<button>`が`type`未指定で`submit`扱いになり、フォーム送信でリロードされてタブ内の`Ufdb`が作り直されていたこと。`type="button"`で解消。SidePanelのフォームを`make_set`につなぐときは`onSubmit`で`e.preventDefault()`する
+  - [ ] `groups`を公開する。wasm-bindgenは`Vec<Vec<String>>`（入れ子のVec）を返せないため、`serde-wasm-bindgen`で`JsValue`に変換して返す予定（TS側は`any`になるので`string[][]`として受け取る）。並び順はStudioの`groups`コマンドと揃える
 - [ ] 公開URLで`make_set`/`groups`が動くことを確認する
+  - [x] `make_set`: git依存の`ufodb_v0`でCIのビルドが通り、Pages上で1回目`true`・2回目`false`になることを確認（2026-09-27、`da866a6`）
+  - [ ] `groups`
 - [ ] 残りの操作（`unite`/`same`/`size`/`unmerge`など、Studioの`#[tauri::command]`と同じ粒度）を公開する
 
 ## Phase 4: 画面を組み立てる
