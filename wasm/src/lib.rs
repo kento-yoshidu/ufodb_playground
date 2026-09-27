@@ -2,11 +2,13 @@ use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
 #[derive(Debug)]
+#[allow(unused)]
 struct Counter {
     count: u32,
 }
 
 #[wasm_bindgen]
+#[allow(unused)]
 impl Counter {
     #[wasm_bindgen(constructor)]
     pub fn new() -> Self {

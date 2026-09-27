@@ -1,5 +1,5 @@
 import "./App.css";
-import { Dummy } from "ufodb-design-system";
+import { Header } from "ufodb-design-system";
 import init, { Counter } from "../wasm/pkg/wasm.js";
 import { useEffect, useRef, useState } from "react";
 
@@ -33,8 +33,14 @@ function App() {
         <p>Now Loading...</p>
       )}
 
-      <Dummy label="UFO DB Playground"/>
+      <Header
+        isSidebarOpen={false}
+        onToggleSidebar={() => console.log("open")}
+      />
 
+      <p>
+        最終build : {new Date(__BUILD_TIME__).toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })}
+      </p>
       {wasmReady && (
         <>
 
