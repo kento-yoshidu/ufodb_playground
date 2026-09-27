@@ -22,6 +22,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `src/` — React + TypeScript（Vite）。UIコンポーネントは`ufodb-design-system`から使い、このリポジトリではWASMとの接続と画面の組み立てを行う
   - `wasm/pkg/wasm.js`から`init`（default export）と公開した関数・クラスをimportする
   - WASMは最初に`init()`が必要。`init()`が終わる前に関数を呼ぶと`Cannot read properties of undefined`になるので、`init().then(...)`で準備完了のstateを立ててから呼ぶ
+  - `init()`はアプリ全体で1回だけ呼ぶ（`useEffect`の中で呼ばない）。`StrictMode`で`useEffect`が2回走ると`init()`が同時に2回呼ばれてWASMのインスタンスが2つでき、GCされた方の`free`が生きているオブジェクトのメモリを壊して`memory access out of bounds`になる
   - 状態を持つWASMのオブジェクト（`Counter`、将来の`Ufdb`）は、`init()`のあとに1回だけ`new`して`useRef`で持つ。WASMの中の値が変わってもReactは再描画しないため、操作のあとに値（`groups()`など）を読み直してstateに入れる
 
 Studioとの対応関係:
@@ -34,9 +35,9 @@ Studioとの対応関係:
 
 ## `ufodb_v0`への依存
 
-- （Phase 3-2で追加予定）`wasm/Cargo.toml`では、`ufodb_v0`をgit依存（`https://github.com/kento-yoshidu/toy_ufdb`）で参照する（publicなのでCIでも認証不要）。必要に応じて`tag`/`rev`でバージョンを固定する
+- （Phase 3-2で追加予定）`wasm/Cargo.toml`では、`ufodb_v0`をgit依存（`https://github.com/kento-yoshidu/ufodb_v0`）で参照する（publicなのでCIでも認証不要）。必要に応じて`tag`/`rev`でバージョンを固定する
 - ローカルで`ufodb_v0`の変更を試すときは、Cargoの`[patch]`でローカルのパスに差し替える
-- `ufodb_v0`本体（コア機能・公開API・`Cargo.toml`）の変更はこのリポジトリでは行わない。Playgroundで必要になった公開APIが無い場合や、WASMでビルドできない依存がある場合は、`toy_ufdb`側で対応してもらう
+- `ufodb_v0`本体（コア機能・公開API・`Cargo.toml`）の変更はこのリポジトリでは行わない。Playgroundで必要になった公開APIが無い場合や、WASMでビルドできない依存がある場合は、`ufodb_v0`側で対応してもらう
 - `ufodb_v0`の`storage`/`db`モジュールはファイルI/O（`std::fs`）を使うため、WASM上では呼ばない
 
 ## `ufodb-design-system`への依存
@@ -65,7 +66,7 @@ Studioとの対応関係:
 
 ## 関連リポジトリ
 
-- `toy_ufdb`（`ufodb_v0`本体）: Union-Find DBのコア。git依存で参照
+- `ufodb_v0`（本体）: Union-Find DBのコア。git依存で参照
 - `ufodb_design_system`（パッケージ名`ufodb-design-system`）: 共通のReactコンポーネントとデザイントークン。UIの変更は基本的にそちらで行う
 - `ufodb_studio`（UFO Studio）: 同じUIを使うTauri製デスクトップアプリ
 

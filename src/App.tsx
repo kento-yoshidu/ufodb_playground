@@ -1,56 +1,84 @@
 import "./App.css";
-import { Header } from "ufodb-design-system";
-import init, { Counter } from "../wasm/pkg/wasm.js";
+import init, { Ufdb } from "../wasm/pkg/wasm.js";
 import { useEffect, useRef, useState } from "react";
+import Contents from "./components/Contents.js";
 
 function App() {
-  const [count, setCount] = useState(0);
+  const [key, setKey] = useState("");
 
-  const [wasmReady, setWasmReady] = useState(false);
-  const counterRef = useRef<Counter | null>(null);
+  const ufdbRef = useRef<Ufdb | null>(null);
 
   useEffect(() => {
     init().then(() => {
-      counterRef.current = new Counter();
-      setWasmReady(true);
+      ufdbRef.current = new Ufdb();
     });
   }, []);
 
-  const handleClick = () => {
-    const counter = counterRef.current;
+  const handleMakeSet = (key: string) => {
+    const ufdb = ufdbRef.current;
 
-    if (!counter) {
+    if (!ufdb) {
       return;
     }
 
-    counter.increment();
-    setCount(counter.value());
+    const res = ufdb.make_set(key);
+
+    window.alert(`make_setの結果 : ${res}`);
   };
 
   return (
-    <section id="center">
-      {!wasmReady && (
-        <p>Now Loading...</p>
-      )}
+    <>
+      <div
+        style={{
+          padding: "40px",
+        }}
+      >
+        <h1>キーの挿入</h1>
 
-      <Header
-        isSidebarOpen={false}
-        onToggleSidebar={() => console.log("open")}
-      />
+        <form>
 
-      <p>
-        最終build : {new Date(__BUILD_TIME__).toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })}
-      </p>
-      {wasmReady && (
-        <>
+          <input
+            value={key}
+            onChange={(e) => setKey(e.target.value)}
+          />
 
-          <p>Count : {count}</p>
+          <button
+            type="button"
+            onClick={() => handleMakeSet(key)}
+          >
+            make_setの実行
+          </button>
+        </form>
 
-          <button onClick={handleClick}>+1</button>
-        </>
-      )}
-    </section>
+      </div>
+
+      <Contents />
+    </>
   );
+
+  //   <section id="center">
+  //     {!wasmReady && (
+  //       <p>Now Loading...</p>
+  //     )}
+
+  //     <Header
+  //       isSidebarOpen={false}
+  //       onToggleSidebar={() => console.log("open")}
+  //     />
+
+  //     <p>
+  //       最終build : {new Date(__BUILD_TIME__).toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })}
+  //     </p>
+  //     {wasmReady && (
+  //       <>
+
+  //         <p>Count : {count}</p>
+
+  //         <button onClick={handleClick}>+1</button>
+  //       </>
+  //     )}
+  //   </section>
+  // );
 }
 
 export default App;

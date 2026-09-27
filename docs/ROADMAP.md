@@ -66,13 +66,16 @@ WASMの仕組み（ビルド → Reactから呼ぶ → CIでビルドしてPages
 
 前提（`ufodb_v0`側の対応）:
 
-- [ ] **ブロッカー**: `ufodb_v0`の`lib`が`wasm32-unknown-unknown`でビルドできない。`open`/`tiny_http`（`main.rs`の`SNAPSHOT`でしか使わない）が`[dependencies]`にあり、libのビルドにも巻き込まれるため。2026-09-26時点で`cargo check --lib --target wasm32-unknown-unknown`が`open`クレートの`compile_error!`（`open is not supported on this platform`）で失敗することを確認。コアのコードは変更不要で、`Cargo.toml`の依存をfeature（`storage`/`cli`）で分ければ通る見込み（`ufodb/docs/ROADMAP.md`の「Web Playground（WASM、別リポジトリ）との連携メモ」参照）
-- [ ] `ufodb/`で`cargo check --lib --target wasm32-unknown-unknown --no-default-features`が通ることを確認する（`wasm32-unknown-unknown`ターゲットは手元にインストール済み）
+- [x] ~~**ブロッカー**~~（解消）: `ufodb_v0`の`lib`が`wasm32-unknown-unknown`でビルドできなかった。`open`/`tiny_http`（`main.rs`の`SNAPSHOT`でしか使わない）が`[dependencies]`にあり、libのビルドにも巻き込まれていたため（`open`クレートの`compile_error!`で失敗）。2026-09-27、`ufodb_v0`側で依存をfeature（`storage` = `directories`/`serde_json`、`cli` = `clap`/`open`/`tiny_http` + `storage`、`default = ["cli"]`）に分け、binに`required-features = ["cli"]`を付けて解消（`ufodb_v0`側はまだ未コミット）
+- [x] `ufodb/`で`cargo check --lib --target wasm32-unknown-unknown --no-default-features`が通ることを確認する（2026-09-27確認）
 
 Playground側（3-1のサンプルの中身を`Ufdb`に置き換える）:
 
 - [ ] `wasm/Cargo.toml`に`ufodb_v0`を追加する。最初はローカルの`ufodb`をpath依存か`[patch]`で参照し、`ufodb_v0`側の変更が`main`に入ったらgit依存（`default-features = false`）に切り替える
+  - [x] path依存（`ufodb_v0 = { path = "../../ufodb", default-features = false }`）で追加し、`wasm/`で`cargo check --target wasm32-unknown-unknown`が通ることを確認（2026-09-27）
+  - [x] `ufodb_v0`側の変更が`main`に入った（2026-09-27、`29ccd97`）ので、git依存（`git = "https://github.com/kento-yoshidu/ufodb_v0"`、`default-features = false`）に切り替える。path依存のままだとCI（GitHub Actions）には`../../ufodb`が無いためビルドが失敗するので、`main`へマージする前に切り替える
 - [ ] `#[wasm_bindgen]`で`Ufdb`をラップした型を公開する。最初は`new`/`make_set`/`groups`だけ。`groups()`は借用（`HashMap<usize, Vec<&String>>`）を返すため、所有権のある型（`Vec<Vec<String>>`など）に変換して返す
+  - [ ] `make_set`をReactから呼ぶと`RuntimeError: memory access out of bounds`になる（2026-09-27）。原因は`StrictMode`で`useEffect`が2回走り、`init()`が同時に2回呼ばれること。`init()`の「初期化済みなら何もしない」チェックは読み込み完了後にしか効かないため、WASMのインスタンスが2つでき、後から完了した方で`wasm`が上書きされる。先に作った`Ufdb`がGCされると、`FinalizationRegistry`がその`free`を「今の」インスタンスに対して呼び、同じアドレスにある生きている`Ufdb`のメモリを解放してしまう（Nodeで`init()`を2回同時に呼び、`gc()`後に`make_set`して再現確認）。`init()`をモジュールのトップレベルや`main.tsx`で1回だけ呼ぶようにして解消する
 - [ ] 公開URLで`make_set`/`groups`が動くことを確認する
 - [ ] 残りの操作（`unite`/`same`/`size`/`unmerge`など、Studioの`#[tauri::command]`と同じ粒度）を公開する
 
