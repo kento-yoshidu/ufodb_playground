@@ -19,7 +19,7 @@ importers:
         version: 19.3.0(react@19.3.0)
       ufodb-design-system:
         specifier: github:kento-yoshidu/ufodb_design_system
-        version: https://codeload.github.com/kento-yoshidu/ufodb_design_system/tar.gz/636a111f0cd6e0b774703713bc894a0c10467912(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+        version: https://codeload.github.com/kento-yoshidu/ufodb_design_system/tar.gz/efca88986e33ba0d2ead19c50d368bd9389c446a(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
     devDependencies:
       '@eslint/js':
         specifier: ^10.0.1
@@ -865,8 +865,8 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  ufodb-design-system@https://codeload.github.com/kento-yoshidu/ufodb_design_system/tar.gz/636a111f0cd6e0b774703713bc894a0c10467912:
-    resolution: {tarball: https://codeload.github.com/kento-yoshidu/ufodb_design_system/tar.gz/636a111f0cd6e0b774703713bc894a0c10467912}
+  ufodb-design-system@https://codeload.github.com/kento-yoshidu/ufodb_design_system/tar.gz/efca88986e33ba0d2ead19c50d368bd9389c446a:
+    resolution: {tarball: https://codeload.github.com/kento-yoshidu/ufodb_design_system/tar.gz/efca88986e33ba0d2ead19c50d368bd9389c446a}
     version: 0.0.0
     peerDependencies:
       react: ^19
@@ -1727,7 +1727,7 @@ snapshots:
 
   typescript@6.0.3: {}
 
-  ufodb-design-system@https://codeload.github.com/kento-yoshidu/ufodb_design_system/tar.gz/636a111f0cd6e0b774703713bc894a0c10467912(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
+  ufodb-design-system@https://codeload.github.com/kento-yoshidu/ufodb_design_system/tar.gz/efca88986e33ba0d2ead19c50d368bd9389c446a(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
     dependencies:
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)

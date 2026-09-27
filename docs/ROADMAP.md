@@ -81,6 +81,9 @@ Playground側（3-1のサンプルの中身を`Ufdb`に置き換える）:
 `ufodb-design-system`に本物のコンポーネント（`Header`・グループ一覧・`SidePanel`）が揃ってきたら、それを使って画面を組み立て、Phase 3のWASMの呼び出しにつなぐ。
 
 - [ ] テンプレート由来のファイルを整理しておく（Phase 1の最後の項目）
+- [ ] `Header`を取り込む。design_system側で`main`にマージ済み（`efca889`）なので、`pnpm update ufodb-design-system`で取り込む（lockfileの参照先が`636a111`から更新されることを確認し、lockfileをコミットする）
+  - `isSidebarOpen`・`onToggleSidebar`が必須props。サイドパネルはまだ無いので、当面は`useState<boolean>`で開閉状態だけ持つ
+  - ロゴ・タイトルがdesign_system側で固定のうちは、Playgroundではロゴが404になる（`/app-icon.svg`が`base`を無視した絶対パスで、Playgroundの`public/`にも無い）。design_system側でpropsにしてもらってから、`import.meta.env.BASE_URL`付きのパスを渡す
 - [ ] Studioの画面と見比べて、同じ見た目・同じ操作感になっているか確認する。差がある場合は、Playground側で直さず`ufodb-design-system`側で直す
 - [ ] design_system側の変更を取り込むときは、design_system側で`main`にマージしてから、こちらで`pnpm update ufodb-design-system`を実行してlockfileをコミットする。マージ前の変更を試したいときだけ、一時的に`link:../design_system`に切り替える（下の「メモ」参照）
 
