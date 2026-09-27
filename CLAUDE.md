@@ -45,6 +45,7 @@ Studioとの対応関係:
 - CIでビルドするため、git依存（`"ufodb-design-system": "github:kento-yoshidu/ufodb_design_system"`）で参照する。design_system側がビルド済みの`dist/`をコミットしているので、インストール時のビルドは不要
 - `#<タグ/コミット>`は付けない。インストール時のコミットが`pnpm-lock.yaml`に記録されて固定されるので、lockfileは必ずコミットする。design_systemの更新を取り込むときは`pnpm update ufodb-design-system`を実行し、lockfileの変更をコミットする
 - design_system側の`main`にまだマージしていない変更を試すときは、一時的に`link:../design_system`に切り替える（手順と注意点は`docs/ROADMAP.md`の「メモ: `link:`で一時的に参照するとき」）
+- Studioは`link:../design_system`で参照しているため、design_systemの手元の`dist/`（未コミットの変更を含む）が見える。Playground（`pnpm dev`）はlockfileで固定した`main`のコミットを見るので、両者の見た目が違うときはまず参照先の違いを疑う
 
 ## デプロイ
 
@@ -62,6 +63,7 @@ Studioとの対応関係:
 - `pnpm build` — `eslint .` → `tsc -b` → `vite build`。静的ファイルを`dist/`に出力（`.wasm`も`dist/assets/`にコピーされる）
 - `pnpm preview` — 本番ビルドの確認
 - `pnpm lint` — ESLintのみ
+- `pnpm ds-update` — `ufodb-design-system`をGitHubの最新の`main`に更新（lockfileが変わるのでコミットする）
 - `cargo test`（`wasm/`内で実行）
 
 ## 関連リポジトリ
