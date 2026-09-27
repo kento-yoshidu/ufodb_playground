@@ -22,7 +22,7 @@
   }
 }
 
-.row,
+/* .row,
 .detailsContent {
   display: flex;
   gap: 8px;
@@ -38,4 +38,4 @@
 .row button,
 .detailsContent button {
   flex-shrink: 0;
-}
+} */
