@@ -1,14 +1,16 @@
 import { useState } from "react";
-import { Header, InsertKeyForm } from "ufodb-design-system";
+import { Header, InsertKeyForm, MergeForm } from "ufodb-design-system";
 import styles from "./contents.module.css";
 import SidePanel from "./SidePanel";
 
 type Props = {
   onInsert: (key: string) => void;
+  onMerge: (keyA: string, keyB: string) => void;
 };
 
 export default function Contents({
   onInsert,
+  onMerge,
 }: Props) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
@@ -26,7 +28,10 @@ export default function Contents({
           <InsertKeyForm
             onSubmit={onInsert}
           />
-          side
+
+          <MergeForm
+            onSubmit={onMerge}
+          />
         </SidePanel>
 
         <p>main</p>
