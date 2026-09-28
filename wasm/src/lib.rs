@@ -21,4 +21,14 @@ impl Ufdb {
     pub fn merge(&mut self, key_a: &str, key_b: &str) -> bool {
         self.inner.unite(key_a, key_b)
     }
+
+    #[wasm_bindgen(unchecked_return_type = "string[][]")]
+    pub fn groups(&mut self) -> JsValue {
+        let groups: Vec<Vec<String>> = self.inner.groups()
+            .into_values()
+            .map(|group| group.into_iter().cloned().collect())
+            .collect();
+
+        serde_wasm_bindgen::to_value(&groups).unwrap()
+    }
 }
