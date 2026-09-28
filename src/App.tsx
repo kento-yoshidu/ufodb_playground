@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Ufdb } from "../wasm/pkg/wasm.js";
 import Contents from "./components/Contents.js";
-import "./App.css";
 
 function App() {
   const ufdbRef = useRef<Ufdb | null>(null);
