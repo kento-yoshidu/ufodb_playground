@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Header, InsertKeyForm, MergeForm } from "ufodb-design-system";
-import styles from "./contents.module.css";
 import SidePanel from "./SidePanel";
+import styles from "./contents.module.css";
 
 type Props = {
   onInsert: (key: string) => void;
