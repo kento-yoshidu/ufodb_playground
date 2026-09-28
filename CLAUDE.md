@@ -64,7 +64,7 @@ Studioとの対応関係:
 - `pnpm preview` — 本番ビルドの確認
 - `pnpm lint` — ESLintのみ
 - `pnpm ds-update` — `ufodb-design-system`をGitHubの最新の`main`に更新（lockfileが変わるのでコミットする）
-- `cargo test`（`wasm/`内で実行）
+- `cargo test`（`wasm/`内で実行）— ラッパーのテスト。`JsValue`はWASMの外では作れないので、`JsValue`を返す公開メソッドは直接テストせず、中身をJSに公開しない関数（例: `sorted_groups()`）に分けてテストする
 
 ## 関連リポジトリ
 
