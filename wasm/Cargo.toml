@@ -11,4 +11,5 @@ wasm-bindgen = "0.2.129"
 # ufodb_v0 = { path = "../../ufodb", default-features = false }
 ufodb_v0 = { git = "https://github.com/kento-yoshidu/ufodb_v0", default-features = false }
 serde-wasm-bindgen = "0.6.5"
+itertools = "0.15.0"
 
