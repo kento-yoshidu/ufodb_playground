@@ -6,11 +6,13 @@ import SidePanel from "./SidePanel";
 type Props = {
   onInsert: (key: string) => void;
   onMerge: (keyA: string, keyB: string) => void;
+  groups: string[][];
 };
 
 export default function Contents({
   onInsert,
   onMerge,
+  groups,
 }: Props) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
@@ -34,7 +36,20 @@ export default function Contents({
           />
         </SidePanel>
 
-        <p>main</p>
+        {groups.length > 0 && (
+          <div className={styles.groups}>
+            {groups.map((group) => (
+              <div
+                key={group[0]}
+                className={styles.group}
+              >
+                {group.map((ele) => (
+                  <p key={ele}>{ele}</p>
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );
