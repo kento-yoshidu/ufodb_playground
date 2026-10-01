@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Header, InsertKeyForm, MergeForm } from "ufodb-design-system";
+import { Groups, Header, InsertKeyForm, MergeForm } from "ufodb-design-system";
 import SidePanel from "./SidePanel";
 import styles from "./contents.module.css";
 
@@ -36,20 +36,13 @@ export default function Contents({
           />
         </SidePanel>
 
-        {groups.length > 0 && (
-          <div className={styles.groups}>
-            {groups.map((group) => (
-              <div
-                key={group[0]}
-                className={styles.group}
-              >
-                {group.map((ele) => (
-                  <p key={ele}>{ele}</p>
-                ))}
-              </div>
-            ))}
-          </div>
-        )}
+        <div className={styles.right}>
+          {groups.length > 0 && (
+            <Groups
+              groups={groups}
+            />
+          )}
+        </div>
       </main>
     </div>
   );
