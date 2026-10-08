@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Groups, Header, InsertKeyForm, MergeForm } from "ufodb-design-system";
-import SidePanel from "./SidePanel";
+import { Groups, Header, InsertKeyForm, MergeForm, SidePanel } from "ufodb-design-system";
 import styles from "./contents.module.css";
 
 type Props = {
