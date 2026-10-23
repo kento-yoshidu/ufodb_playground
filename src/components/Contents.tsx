@@ -32,6 +32,7 @@ export default function Contents({
 
           <MergeForm
             onSubmit={onMerge}
+            options={groups}
           />
         </SidePanel>
 
