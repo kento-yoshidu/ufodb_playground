@@ -1,5 +1,13 @@
 import { useState } from "react";
-import { Groups, Header, InsertKeyForm, MergeForm, SidePanel } from "ufodb-design-system";
+import {
+  Groups,
+  Header,
+  InsertKeyForm,
+  MenuPanel,
+  MergeForm,
+  type Action,
+  type Mode,
+} from "ufodb-design-system";
 import styles from "./contents.module.css";
 
 type Props = {
@@ -13,37 +21,73 @@ export default function Contents({
   onMerge,
   groups,
 }: Props) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [mode, setMode] = useState<Mode>("row");
+  const [isMenuOpen, setIsMenuOpen] = useState(true);
+
+  const [activeAction, setActiveAction] = useState<Action | null>(null);
+
+  const [sameResult, setSameResult] = useState<string | null>(null);
+
+  const selectAction = (action: Action | null) => {
+    setActiveAction(action);
+    setSameResult(null);
+  };
 
   return (
     <div className={styles.wrapper}>
       <Header
-        isSidebarOpen={isSidebarOpen}
-        onToggleSidebar={() => setIsSidebarOpen((open) => !open)}
+        isSidebarOpen={isMenuOpen}
+        onToggleSidebar={() => setIsMenuOpen((open) => !open)}
       />
 
       <main className={styles.main}>
-        <SidePanel
-          isOpen={isSidebarOpen}
+        {mode === "row" ? (
+          <div className={styles.right}>
+            {groups.length > 0 && (
+              <Groups
+                groups={groups}
+              />
+            )}
+          </div>
+        ) : (
+          <div className={styles.graph}>
+            <p>comming soon...</p>
+          </div>
+        )}
+      </main>
+
+      {isMenuOpen && (
+        <MenuPanel
+          active={activeAction}
+          onSelect={selectAction}
+          mode={mode}
+          onChangeMode={setMode}
         >
-          <InsertKeyForm
-            onSubmit={onInsert}
-          />
-
-          <MergeForm
-            onSubmit={onMerge}
-            options={groups}
-          />
-        </SidePanel>
-
-        <div className={styles.right}>
-          {groups.length > 0 && (
-            <Groups
-              groups={groups}
+          {activeAction === "insert" && (
+            <InsertKeyForm
+              onSubmit={onInsert}
             />
           )}
-        </div>
-      </main>
+
+          {activeAction === "merge" && (
+            <MergeForm
+              options={groups}
+              onSubmit={onMerge}
+            />
+          )}
+
+          {activeAction === "same" && (
+            <p>comming soon...</p>
+            // <>
+            //   <SameForm
+            //     onSubmit={handleSame}
+            //   />
+
+            //   {sameResult && <p className={menuStyles.result}>{sameResult}</p>}
+            // </>
+          )}
+        </MenuPanel>
+      )}
     </div>
   );
 }
