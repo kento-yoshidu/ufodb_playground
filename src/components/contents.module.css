@@ -6,7 +6,8 @@
   display: flex;
   padding: 24px;
 
-  .right {
+  .row,
+  .graph {
     padding: 24px;
   }
 }
