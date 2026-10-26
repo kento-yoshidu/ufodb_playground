@@ -1,13 +1,22 @@
 .wrapper {
   height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .main {
   display: flex;
   padding: 24px;
+  flex: 1;
+  min-height: 0;
 
   .row,
   .graph {
     padding: 24px;
+  }
+
+  .graph {
+    flex: 1;
+    min-width: 0;
   }
 }

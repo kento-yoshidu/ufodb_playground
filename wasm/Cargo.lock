@@ -177,6 +177,7 @@ name = "wasm"
 version = "0.1.0"
 dependencies = [
  "itertools",
+ "serde",
  "serde-wasm-bindgen",
  "ufodb_v0",
  "wasm-bindgen",

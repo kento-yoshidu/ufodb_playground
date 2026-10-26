@@ -1,11 +1,13 @@
 import { useState } from "react";
 import {
+  Graph,
   Groups,
   Header,
   InsertKeyForm,
   MenuPanel,
   MergeForm,
   type Action,
+  type GraphData,
   type Mode,
 } from "ufodb-design-system";
 import styles from "./contents.module.css";
@@ -14,14 +16,17 @@ type Props = {
   onInsert: (key: string) => void;
   onMerge: (keyA: string, keyB: string) => void;
   groups: string[][];
+  graph: GraphData;
 };
 
 export default function Contents({
   onInsert,
   onMerge,
   groups,
+  graph,
 }: Props) {
   const [mode, setMode] = useState<Mode>("row");
+
   const [isMenuOpen, setIsMenuOpen] = useState(true);
 
   const [activeAction, setActiveAction] = useState<Action | null>(null);
@@ -51,7 +56,9 @@ export default function Contents({
           </div>
         ) : (
           <div className={styles.graph}>
-            <p>comming soon...</p>
+            <Graph
+              graph={graph}
+            />
           </div>
         )}
       </main>

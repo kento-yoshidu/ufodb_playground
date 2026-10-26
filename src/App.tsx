@@ -1,11 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { Ufdb } from "../wasm/pkg/wasm.js";
 import Contents from "./components/Contents.js";
+import type { GraphData } from "ufodb-design-system";
 
 function App() {
   const ufdbRef = useRef<Ufdb | null>(null);
 
   const [groups, setGroups] = useState<string[][]>([]);
+  const [graph, setGraph] = useState<GraphData>({
+    nodes: [],
+    edges: [],
+  });
 
   useEffect(() => {
     ufdbRef.current = new Ufdb();
@@ -21,7 +26,7 @@ function App() {
     ufdb.make_set(key);
 
     setGroups(ufdb.groups());
-
+    setGraph(ufdb.graph());
   };
 
   const handleMerge = (keyA: string, keyB: string) => {
@@ -34,6 +39,7 @@ function App() {
     ufdb.merge(keyA, keyB);
 
     setGroups(ufdb.groups());
+    setGraph(ufdb.graph());
   };
 
   return (
@@ -41,6 +47,7 @@ function App() {
       onInsert={handleInsert}
       onMerge={handleMerge}
       groups={groups}
+      graph={graph}
     />
   );
 }

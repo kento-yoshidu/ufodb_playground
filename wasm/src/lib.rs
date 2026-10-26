@@ -6,6 +6,18 @@ pub struct Ufdb {
     inner: ufodb_v0::Ufdb,
 }
 
+#[derive(serde::Serialize)]
+struct Edge {
+    source: String,
+    target: String,
+}
+
+#[derive(serde::Serialize)]
+struct GraphData {
+    nodes: Vec<String>,
+    edges: Vec<Edge>,
+}
+
 #[wasm_bindgen]
 impl Ufdb {
     #[wasm_bindgen(constructor)]
@@ -27,6 +39,11 @@ impl Ufdb {
     pub fn groups(&mut self) -> JsValue {
         serde_wasm_bindgen::to_value(&self.sorted_groups()).unwrap()
     }
+
+    #[wasm_bindgen(unchecked_return_type = "{ nodes: string[]; edges: { source: string; target: string }[] }")]
+    pub fn graph(&mut self) -> JsValue {
+        serde_wasm_bindgen::to_value(&self.make_graph()).unwrap()
+    }
 }
 
 impl Ufdb {
@@ -38,6 +55,35 @@ impl Ufdb {
             .map(|group| group.into_iter().cloned().sorted().collect_vec())
             .sorted_by(|a, b| b.len().cmp(&a.len()).then_with(|| a.cmp(b)))
             .collect_vec()
+    }
+
+    fn make_graph(&mut self) -> GraphData {
+        let mut nodes: Vec<String> = self.inner
+            .groups()
+            .into_values()
+            .flatten()
+            .cloned()
+            .collect();
+
+        nodes.sort();
+
+        let mut edges = Vec::new();
+
+        for key in nodes.iter() {
+            if let Some(neighbors) = self.inner.neighbors(key) {
+                for neighbor in neighbors {
+                    if key < neighbor {
+                        edges.push(Edge {
+                            source: key.clone(),
+                            target: neighbor.clone(),
+                        });
+                    }
+                }
+            }
+        }
+
+        GraphData { nodes, edges }
+
     }
 }
 
