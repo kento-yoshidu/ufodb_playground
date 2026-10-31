@@ -99,6 +99,17 @@ Playground側（3-1のサンプルの中身を`Ufdb`に置き換える）:
 - [ ] Studioの画面と見比べて、同じ見た目・同じ操作感になっているか確認する。差がある場合は、Playground側で直さず`ufodb-design-system`側で直す
 - [ ] design_system側の変更を取り込むときは、design_system側で`main`にマージしてから、こちらで`pnpm update ufodb-design-system`を実行してlockfileをコミットする。マージ前の変更を試したいときだけ、一時的に`link:../design_system`に切り替える（下の「メモ」参照）
 
+### TanStack Queryの導入
+
+Studioと同じく、`groups`/`graph`の読み出しをTanStack Queryに載せる。「操作 → `groups()`を読み直す → stateに入れる」の手書きをなくし、Studioと書き方を揃える。
+
+- [ ] `pnpm add @tanstack/react-query`（Studioと同じ`^5`）。devtoolsはStudioでも`package.json`にあるだけで使っていないので入れない
+- [ ] `main.tsx`で`QueryClient`を作り、`QueryClientProvider`で`<App />`を包む。`defaultOptions`はStudioと揃える（`networkMode: "always"`・`retry: false`・`refetchOnWindowFocus: false`・`staleTime: Infinity`）。`networkMode: "always"`が無いと、オフライン時にクエリが止まる（通信しないのに`navigator.onLine`で判定されるため）
+- [ ] `Ufdb`のインスタンスを`useRef` + `useEffect`で作るのをやめ、`init()`の`.then`の中で1回だけ`new`して`App`にpropsで渡す。クエリの初回取得はマウント時のeffectで走るため、`useEffect`で作ると`queryFn`の実行時にまだ`null`のことがある
+- [ ] `groups`/`graph`を`useQuery`にする（`queryKey`は`["ufdb", "groups"]`・`["ufdb", "graph"]`）。Studioの`graph`は`useState`のまま残っているが、こちらは最初から両方クエリにする
+- [ ] `handleInsert`/`handleMerge`は、WASMを呼んだあと`invalidateQueries({ queryKey: ["ufdb"] })`で`ufdb`以下をまとめて読み直す（`setGroups`/`setGraph`を消す）。`useMutation`はStudioと同様に使わない
+- [ ] 導入後、`CLAUDE.md`の「`useRef`で持つ」「stateに入れる」の説明を実態に合わせて更新する
+
 ## メモ: `link:`で一時的に参照するとき
 
 design_systemの`main`にまだマージしていない変更をPlaygroundで試したいときは、`package.json`を一時的に`"ufodb-design-system": "link:../design_system"`に書き換える。
