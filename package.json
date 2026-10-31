@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@stylistic/eslint-plugin": "^5.10.0",
+    "@tanstack/react-query": "^5.105.0",
     "react": "^19",
     "react-dom": "^19",
     "ufodb-design-system": "github:kento-yoshidu/ufodb_design_system"

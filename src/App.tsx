@@ -1,44 +1,39 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Ufdb } from "../wasm/pkg/wasm.js";
 import Contents from "./components/Contents.js";
 import type { GraphData } from "ufodb-design-system";
 
-function App() {
-  const ufdbRef = useRef<Ufdb | null>(null);
+type Props = {
+  ufdb: Ufdb;
+};
 
-  const [groups, setGroups] = useState<string[][]>([]);
+function App({
+  ufdb,
+}: Props) {
+  const queryClient = useQueryClient();
+
+  const { data: groups = [] } = useQuery({
+    queryKey: ["ufdb", "groups"],
+    queryFn: () => ufdb.groups(),
+  });
+
   const [graph, setGraph] = useState<GraphData>({
     nodes: [],
     edges: [],
   });
 
-  useEffect(() => {
-    ufdbRef.current = new Ufdb();
-  }, []);
-
   const handleInsert = (key: string) => {
-    const ufdb = ufdbRef.current;
-
-    if (!ufdb) {
-      return;
-    }
-
     ufdb.make_set(key);
 
-    setGroups(ufdb.groups());
+    queryClient.invalidateQueries({ queryKey: ["ufdb"]});
     setGraph(ufdb.graph());
   };
 
   const handleMerge = (keyA: string, keyB: string) => {
-    const ufdb = ufdbRef.current;
-
-    if (!ufdb) {
-      return;
-    }
-
     ufdb.merge(keyA, keyB);
 
-    setGroups(ufdb.groups());
+    queryClient.invalidateQueries({ queryKey: ["ufdb"]});
     setGraph(ufdb.graph());
   };
 

@@ -93,6 +93,18 @@ export default function Contents({
             //   {sameResult && <p className={menuStyles.result}>{sameResult}</p>}
             // </>
           )}
+
+          {activeAction === "size" && (
+            <p>comming soon...</p>
+          )}
+
+          {activeAction === "unmerge" && (
+            <p>comming soon...</p>
+          )}
+
+          {activeAction === "delete" && (
+            <p>commin soon...</p>
+          )}
         </MenuPanel>
       )}
     </div>
